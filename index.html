@@ -4,20 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <meta property="og:title" content="축구 리그 순위표">
+  <meta property="og:description" content="축구 아시안컵 조별리그 경기 및 순위표를 제공하는 웹앱입니다. 최신 결과와 통계를 확인하세요.">
+  <meta property="og:image" content="마침표 지정이미지URL">
+  <meta property="og:url" content="웹앱URL">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="축구 리그 순위표">
+  <meta name="twitter:description" content="축구 아시안컵 조별리그 경기 및 순위표를 제공하는 웹앱입니다. 최신 결과와 통계를 확인하세요.">
+  <meta name="twitter:image" content="마침표 지정이미지URL">
+
     <title>축구 리그 순위표</title>
     <style>
         body {
             padding: 20px;
-            background-color: #f8f9fa; /* 배경색 조정 */
+            background-color: #f8f9fa;
         }
 
         .match-card {
             margin-bottom: 10px;
         }
 
-        /* 순위표 테이블 스타일 */
         table {
-            background-color: #fff; /* 표 배경색 조정 */
+            background-color: #fff;
         }
 
         th, td {
@@ -26,23 +34,22 @@
         }
 
         th {
-            background-color: #007bff; /* 헤더 배경색 조정 */
-            color: #fff; /* 헤더 글자색 조정 */
+            background-color: #007bff;
+            color: #fff;
         }
 
-        /* 경기 결과 카드 스타일 */
         .match-card {
-            background-color: #fff; /* 카드 배경색 조정 */
+            background-color: #fff;
             border: 1px solid #dee2e6;
             border-radius: 5px;
         }
 
         .match-card .card-title {
-            color: #007bff; /* 카드 제목 글자색 조정 */
+            color: #007bff;
         }
 
         .match-card .card-text {
-            color: #495057; /* 카드 텍스트 글자색 조정 */
+            color: #495057;
         }
     </style>
 </head>
@@ -52,12 +59,15 @@
     <h1 id="tournamentName" class="text-center text-primary"></h1>
 
     <div class="row mt-4">
-        <div class="col-md-6">
-            <h2 class="text-center text-primary">승점자동계산기</h2>
+        <div class="col-md-6 offset-md-3"> <!-- 가운데 정렬을 위해 offset-md-3 추가 -->
+            <h2 class="text-center text-primary">팀 명 입력</h2>
             <div id="teamNames"></div>
         </div>
-        <div class="col-md-6">
-            <h2 class="text-center text-primary">경기결과입력버튼 누르세요</h2>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6 offset-md-3"> <!-- 가운데 정렬을 위해 offset-md-3 추가 -->
+            <h2 class="text-center text-primary">경기와 경기결과 입력</h2>
             <div id="matchResults"></div>
             <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#matchResultModal">경기결과 입력</button>
         </div>
