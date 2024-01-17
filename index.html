@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>축구 리그 순위표</title>
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f8f9fa; /* 배경색 조정 */
+        }
+
+        .match-card {
+            margin-bottom: 10px;
+        }
+
+        /* 순위표 테이블 스타일 */
+        table {
+            background-color: #fff; /* 표 배경색 조정 */
+        }
+
+        th, td {
+            text-align: center;
+            vertical-align: middle !important;
+        }
+
+        th {
+            background-color: #007bff; /* 헤더 배경색 조정 */
+            color: #fff; /* 헤더 글자색 조정 */
+        }
+
+        /* 경기 결과 카드 스타일 */
+        .match-card {
+            background-color: #fff; /* 카드 배경색 조정 */
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+
+        .match-card .card-title {
+            color: #007bff; /* 카드 제목 글자색 조정 */
+        }
+
+        .match-card .card-text {
+            color: #495057; /* 카드 텍스트 글자색 조정 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 id="tournamentName" class="text-center text-primary"></h1>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h2 class="text-center text-primary">승점자동계산기</h2>
+            <div id="teamNames"></div>
+        </div>
+        <div class="col-md-6">
+            <h2 class="text-center text-primary">경기결과입력버튼 누르세요</h2>
+            <div id="matchResults"></div>
+            <button class="btn btn-primary mt-3" data-toggle="modal" data-target="#matchResultModal">경기결과 입력</button>
+        </div>
+    </div>
+
+    <h2 class="mt-4 text-center text-primary">순위계산표</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>팀 이름</th>
+            <th>승</th>
+            <th>무</th>
+            <th>패</th>
+            <th>득점</th>
+            <th>실점</th>
+            <th>득실차</th>
+            <th>승점</th>
+        </tr>
+        </thead>
+        <tbody id="standingsTableBody"></tbody>
+    </table>
+
+    <h2 class="mt-4 text-center text-primary">경기 결과</h2>
+    <div id="allMatchResults"></div>
+</div>
+
+<!-- 모달 창 -->
+<div class="modal" id="matchResultModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- 모달 헤더 -->
+            <div class="modal-header">
+                <h4 class="modal-title text-primary">경기 결과 입력</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- 모달 본문 -->
+            <div class="modal-body">
+                <select id="team1Select" class="form-control">
+                </select>
+                <input type="number" id="team1Score" class="form-control mt-2" placeholder="A팀의 득점">
+                <select id="team2Select" class="form-control mt-2">
+                </select>
+                <input type="number" id="team2Score" class="form-control mt-2" placeholder="B팀의 득점">
+            </div>
+
+            <!-- 모달 푸터 -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveMatchResult()">저장</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    let tournamentName;
+    let teamNames = [];
+    let standings = [];
+
+    $(document).ready(function () {
+        tournamentName = prompt("대회이름을 입력해주세요 (예: 24 아시안컵 A조)");
+        $("#tournamentName").text(tournamentName);
+
+        for (let i = 1; i <= 4; i++) {
+            let teamName = prompt("팀 " + i + "의 이름을 입력하세요");
+            teamNames.push(teamName);
+        }
+
+        initializeTeamDropdowns(teamNames);
+        standings = initializeStandings(teamNames);
+        displayStandings(standings);
+    });
+
+    function initializeTeamDropdowns(teamNames) {
+        let team1Select = $("#team1Select");
+        let team2Select = $("#team2Select");
+
+        for (let i = 0; i < teamNames.length; i++) {
+            team1Select.append(`<option value="${teamNames[i]}">${teamNames[i]}</option>`);
+            team2Select.append(`<option value="${teamNames[i]}">${teamNames[i]}</option>`);
+        }
+    }
+
+    function initializeStandings(teamNames) {
+        let standings = [];
+        for (let i = 0; i < teamNames.length; i++) {
+            standings.push({
+                teamName: teamNames[i],
+                wins: 0,
+                draws: 0,
+                losses: 0,
+                goalsFor: 0,
+                goalsAgainst: 0,
+                goalDifference: 0,
+                points: 0,
+                matches: []
+            });
+        }
+        return standings;
+    }
+
+    function saveMatchResult() {
+        let team1 = $("#team1Select").val();
+        let team2 = $("#team2Select").val();
+        let team1Score = parseInt($("#team1Score").val());
+        let team2Score = parseInt($("#team2Score").val());
+
+        if (!isNaN(team1Score) && !isNaN(team2Score)) {
+            let matchResult = `${team1} vs ${team2}: ${team1Score} - ${team2Score}`;
+            $("#matchResults").append(`<p>${matchResult}</p>`);
+
+            updateStandingsData(team1, team2, team1Score, team2Score);
+            displayStandings(standings);
+            displayAllMatchResults();
+
+            $("#team1Score").val("");
+            $("#team2Score").val("");
+            $("#matchResultModal").modal("hide");
+        } else {
+            alert("유효한 득점을 입력하세요.");
+        }
+    }
+
+    function updateStandingsData(team1, team2, team1Score, team2Score) {
+        let team1Index = standings.findIndex(team => team.teamName === team1);
+        let team2Index = standings.findIndex(team => team.teamName === team2);
+
+        standings[team1Index].goalsFor += team1Score;
+        standings[team1Index].goalsAgainst += team2Score;
+        standings[team1Index].goalDifference = standings[team1Index].goalsFor - standings[team1Index].goalsAgainst;
+
+        standings[team2Index].goalsFor += team2Score;
+        standings[team2Index].goalsAgainst += team1Score;
+        standings[team2Index].goalDifference = standings[team2Index].goalsFor - standings[team2Index].goalsAgainst;
+
+        if (team1Score > team2Score) {
+            standings[team1Index].wins++;
+            standings[team1Index].points += 3;
+            standings[team2Index].losses++;
+        } else if (team1Score < team2Score) {
+            standings[team2Index].wins++;
+            standings[team2Index].points += 3;
+            standings[team1Index].losses++;
+        } else {
+            standings[team1Index].draws++;
+            standings[team1Index].points++;
+            standings[team2Index].draws++;
+            standings[team2Index].points++;
+        }
+
+        let matchResult = {
+            teams: [team1, team2],
+            score: `${team1Score} - ${team2Score}`
+        };
+        standings[team1Index].matches.push(matchResult);
+        standings[team2Index].matches.push(matchResult);
+    }
+
+    function displayStandings(standings) {
+        standings.sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference);
+
+        let standingsTableBody = $("#standingsTableBody");
+        standingsTableBody.empty();
+
+        for (let i = 0; i < standings.length; i++) {
+            let row = `<tr>
+                            <td>${standings[i].teamName}</td>
+                            <td>${standings[i].wins}</td>
+                            <td>${standings[i].draws}</td>
+                            <td>${standings[i].losses}</td>
+                            <td>${standings[i].goalsFor}</td>
+                            <td>${standings[i].goalsAgainst}</td>
+                            <td>${standings[i].goalDifference}</td>
+                            <td>${standings[i].points}</td>
+                       </tr>`;
+            standingsTableBody.append(row);
+        }
+    }
+
+    function displayAllMatchResults() {
+        let allMatchResults = $("#allMatchResults");
+        allMatchResults.empty();
+
+        for (let i = 0; i < standings.length; i++) {
+            let matchesHTML = '';
+            for (let j = 0; j < standings[i].matches.length; j++) {
+                let match = standings[i].matches[j];
+                matchesHTML += `
+                    <div class="card match-card">
+                        <div class="card-body">
+                            <h5 class="card-title">${match.teams[0]} vs ${match.teams[1]}</h5>
+                            <p class="card-text">${match.score}</p>
+                        </div>
+                    </div>`;
+            }
+            allMatchResults.append(`<h3 class="text-primary">${standings[i].teamName}</h3>${matchesHTML}`);
+        }
+    }
+</script>
+
+</body>
+</html>
